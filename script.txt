@@ -1,0 +1,73 @@
+Scripts used for adding database and stored procedure
+
+create table actor
+(act_id int primary key,
+act_name char(10),
+act_bio char(50),
+act_gender char(1)
+);
+insert into actor values(11,'puneeth','power star','M');
+insert into actor values(12,'dhiganth','Doodh peda','M');
+insert into actor values(13,'ramya','sandalwood queen','F');
+
+
+
+create table producer
+(pro_id int primary key,
+pro_name char(10),
+pro_phone varchar(10),
+pro_company char(50)
+);
+insert into producer values(1,'dwarakesh',9008958757,'Dwarki prod');
+insert into producer values(2,'lankesh',9449665626,'Lankesh prod');
+insert into producer values(3,'shastri',9449640611,'Shastri prod');
+
+
+
+create table movies
+(mov_id int primary key,
+mov_title char(20),
+mov_year int,
+pro_id int not null,
+act_id int not null,
+foreign key(pro_id) references producer(pro_id), 
+foreign key(act_id) references actor(act_id)
+);
+insert into movies values(100,'male',2003,'1','11');
+insert into movies values(101,'manasare',2017,'2','12');
+insert into movies values(103,'power',2014,'2','13');
+
+
+connection string = "Server=localhost;User ID=root;Password=;Database=imdb"
+
+Stored PROCEDURE GetMovies
+
+DELIMITER $$
+
+USE `imdb`$$
+
+DROP PROCEDURE IF EXISTS `GetMovies`$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetMovies`()
+BEGIN
+SELECT tbl.mov_title AS Movie_name,
+tb.pro_name AS producer,
+act_name AS Actor_name,
+tbl.mov_year AS ReleaseDate
+FROM actor
+INNER JOIN (SELECT mov_title,actor.act_id,mov_year
+            FROM movies
+            INNER JOIN actor 
+            ON movies.act_id = actor.act_id)AS tbl
+ON tbl.act_id = actor.act_id
+INNER JOIN (SELECT pro_name,mov_title
+      FROM  producer
+      INNER JOIN movies
+      ON movies.pro_id = producer.pro_id) AS tb 
+ON tb.mov_title = tbl.mov_title
+ORDER BY tbl.mov_title ASC;
+              
+END$$
+
+DELIMITER ;
+
